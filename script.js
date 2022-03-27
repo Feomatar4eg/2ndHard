@@ -1,121 +1,176 @@
 'use strict';
 /*
-ЗАДАНИЕ:
-1) Сделать проверку при получении данных:
-- ответ на вопрос "Как называется ваш проект?" - строка
-- ответ на вопрос "Какие типы экранов нужно разработать?" - строка
-- ответ на вопрос "Сколько будет стоить данная работа?" - число
-- ответ на вопрос "Какой дополнительный тип услуги нужен?" - строка
-- ответ на вопрос "Сколько это будет стоить?" - число
-Что значит проверка данных: где должен быть текст там только текст
-(голые цифры не должно пропускать, а текст с цифрами - должно. 
-    Пример: "Купил ВАЗ 2108" - ок, "4567989" - нет), где цифры только цифры!
-Если проверку не прошло, то переспрашивать
-2) Проверить, чтобы все работало и не было ошибок в консоли
-3) Добавить папку с уроком на свой GitHub
-
+УСЛОЖНЕННОЕ ЗАДАНИЕ:
+Необходимо выполнить в отдельном js файле, подключенному к отдельной html странице
+1) Выведите на страницу текущую дату и время в 2-х форматах:
+    a) 'Сегодня Вторник, 4 февраля 2020 года, 21 час 5 минут 33 секунды'
+    б) '04.02.2020 - 21:05:33'
+2) Для вывода в формате (а) напишите функцию, которая будет менять склонение
+ слов в зависимости от числа, "час, часов, часа"
+3) Для вывода в формате (б) напишите функцию, которая будет добавлять 0
+ перед значениями которые состоят из одной цифры (из 9:5:3 1.6.2019 сделает 09:05:03 01.06.2019)
+4) С помощью функции setInterval, реализуйте обновление даты и времени каждую секунду
+5) Добавить папку с уроком на свой GitHub
 */
-const appData = {
-    title: '',
-    screens: [],
-    screenPrice: 0,
-    adaptive: true,
-    rollback: 10,
-    allServicePrices: 0,
-    fullPrice: 0,
-    servicePercentPrice: 0,
-    services: {},
-    start: function () {
-        appData.asking();
-        appData.screenPriceMath();
-        appData.getAllServicePrices();
-        appData.getFullPrice();
-        appData.getServicePercentPrices();
-        appData.getTitle();
-        appData.logger();
-    },
-    isNumber: function (num) {
-        return !isNaN(parseFloat(num)) && isFinite(num);
-    },
-    getServicePercentPrices: function () {
-        appData.servicePercentPrice = Math.round(appData.fullPrice - (appData.fullPrice * (appData.rollback / 100)));
-    },
-    getFullPrice: function () {
-        appData.fullPrice = appData.screenPrice + appData.allServicePrices;
-    },
-    getRollbackMsg: function (price) {
-        if (price >= 30000) {
-            return 'Даем скидку в 10%';
-        } else if (price >= 15000) {
-            return 'Даем скидку в 5%';
-        } else if (price >= 0) {
-            return 'Скидка не предусмотрена';
-        } else {
-            return 'что то пошло не так';
-        }
-    },
-    getAllServicePrices: function () {
-        for (let key in appData.services) {
-            appData.allServicePrices += +appData.services[key];
-        }
-    },
-    getTitle: function () {
-        appData.title = appData.title.trim().toLowerCase();
-        appData.title = appData.title[0].toUpperCase() + appData.title.slice(1);
-        appData.title = appData.title;
-    },
-    asking: function () {
-        let i = 0;
-        do {
-            appData.title = prompt('Введите название проекта.', '  кальКУЛЯТОр верстки.');
-        } while (appData.isNumber(appData.title));
-        appData.adaptive = confirm("Нужен ли адаптив на сайте?");
-        for (let i = 0; i < 2; i++) {
-            let price = 0;
-            let name;
-            do {
-                name = prompt("Какие типы экранов нужно разработать?", "Простые, Сложные, Интерактивные" + i);
-            } while (appData.isNumber(name));
-            do {
-                price = +prompt("Сколько будет стоить данная работа?", "5000");
-            } while (!appData.isNumber(price));
-            appData.screens.push({
-                id: i,
-                name: name,
-                price: price
-            });
-        }
-        do {
-            let nameService;
-            let servicePrice;
-            do {
-                nameService = prompt("Какой дополнительный тип услуги нужен?", "Яндекс метрика " + i);
-            } while (appData.isNumber(nameService));
-            do {
-                servicePrice = prompt("Сколько это будет стоить?", '2000');
-            } while (!appData.isNumber(servicePrice));
-            appData.services[nameService + '' + i] = +servicePrice;
-            i++;
-        }
-        while (i < 2);
 
-    },
-    screenPriceMath: function () {
-        appData.screenPrice = appData.screens.reduce((sum, elem) => {
-            return sum += elem.price;
-        }, 0);
-    },
-    logger: function () {
-        for (let key in appData) {
-            //Без методов красивше!
-            if (typeof appData[key] == 'function') {
-                continue;
-            }
-            console.log(key + ' : ' + appData[key]);
+const formDataFirtsType = function () {
+    let date = new Date();
+    let dateText = 'Сегодня';
+    switch (date.getDay()) {
+        case 0: {
+            dateText += ' Воскресенье, ';
+            break;
         }
-        console.log(appData.services);
-        console.log(appData.screens);
+        case 1: {
+            dateText += ' Понедельник, ';
+            break;
+        }
+        case 2: {
+            dateText += ' Вторник, ';
+            break;
+        }
+        case 3: {
+            dateText += ' Среда, ';
+            break;
+        }
+        case 4: {
+            dateText += ' Четверг, ';
+            break;
+        }
+        case 5: {
+            dateText += ' Пятница, ';
+            break;
+        }
+        case 6: {
+            dateText += ' Суббота, ';
+            break;
+        }
     }
+    dateText += date.getDate();
+    switch (date.getMonth()) {
+        case 0: {
+            dateText += ' января ';
+            break;
+        }
+        case 1: {
+            dateText += ' февраля ';
+            break;
+        }
+        case 2: {
+            dateText += ' марта ';
+            break;
+        }
+        case 3: {
+            dateText += ' апреля ';
+            break;
+        }
+        case 4: {
+            dateText += ' мая ';
+            break;
+        }
+        case 5: {
+            dateText += ' июня ';
+            break;
+        }
+        case 6: {
+            dateText += ' июня ';
+            break;
+        }
+        case 7: {
+            dateText += ' августа ';
+            break;
+        }
+        case 8: {
+            dateText += ' сентября ';
+            break;
+        }
+        case 9: {
+            dateText += ' октября ';
+            break;
+        }
+        case 10: {
+            dateText += ' ноября ';
+            break;
+        }
+        case 11: {
+            dateText += ' декабря ';
+            break;
+        }
+    }
+    dateText = dateText + date.getFullYear() + ' года, ';
+    dateText = dateText + date.getHours() + ' ';
+    switch (date.getHours()) {
+        case 1:
+        case 21: {
+            dateText += ' час ';
+            break;
+        }
+        case 2:
+        case 3:
+        case 4:
+        case 22:
+        case 23:
+        case 24: {
+            dateText += ' часа ';
+            break;
+        }
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+        case 10:
+        case 11:
+        case 12:
+        case 13:
+        case 14:
+        case 15:
+        case 16:
+        case 17:
+        case 18:
+        case 19:
+        case 20: {
+            dateText += ' часов ';
+            break;
+        }
+    }
+    dateText = dateText + date.getMinutes() + ' минут ' + date.getSeconds() + ' секунды';
+    return dateText;
+};
+const formDataSecondType = function () {
+    let date = new Date();
+    let dateTxt = '';
+    let day = date.getDate();
+    let month = date.getMonth();
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+    let seconds = date.getSeconds();
+    day < 10 ? dateTxt = dateTxt + '0' + day : dateTxt = dateTxt + day;
+    dateTxt += '.';
+    ((month + 1) < 10) ? dateTxt = dateTxt + '0' + (month + 1): dateTxt = dateTxt + (month + 1);
+    dateTxt += '.';
+    dateTxt += date.getFullYear();
+    dateTxt += ' - ';
+    hours < 10 ? dateTxt = dateTxt + '0' + hours : dateTxt = dateTxt + hours;
+    dateTxt += ':';
+    minutes < 10 ? dateTxt = dateTxt + '0' + minutes : dateTxt = dateTxt + minutes;
+    dateTxt += ':';
+    seconds < 10 ? dateTxt = dateTxt + '0' + seconds : dateTxt = dateTxt + seconds;
+    return dateTxt;
 };
 
-appData.start();
+const printBothFormat = function () {
+    let date = new Date();
+    div.innerHTML = '<strong>' + formDataFirtsType() + '</strong>';
+    div2.innerHTML = '<strong>' + formDataSecondType() + '</strong>';
+};
+
+let div = document.createElement('div');
+let div2 = document.createElement('div');
+div.className = 'dateType1';
+div2.className = 'dateType2';
+
+document.body.append(div);
+document.body.append(div2);
+
+setInterval(printBothFormat, 1000);
